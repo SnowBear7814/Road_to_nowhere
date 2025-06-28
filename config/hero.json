@@ -1,0 +1,8 @@
+{
+    "base_hp": 120,
+    "base_damage": 5,
+    "heal_per_day": 30,
+    "heal_variation": 3,
+    "symbol": "H",
+    "name": "Hero"
+}

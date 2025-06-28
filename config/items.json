@@ -1,0 +1,25 @@
+{
+    "items": [
+        {
+            "name": "Rusty Sword",
+            "type": "weapon",
+            "damage_bonus": 3,
+            "hp_bonus": 0,
+            "symbol": "/"
+        },
+        {
+            "name": "Iron Armor",
+            "type": "armor",
+            "damage_bonus": 0,
+            "hp_bonus": 15,
+            "symbol": "["
+        },
+        {
+            "name": "Magic Amulet",
+            "type": "artifact",
+            "damage_bonus": 2,
+            "hp_bonus": 10,
+            "symbol": "@"
+        }
+    ]
+}

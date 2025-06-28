@@ -1,0 +1,31 @@
+{
+    "enemies": [
+        {
+            "name": "Spider",
+            "symbol": "S",
+            "base_hp": 15,
+            "hp_variation": 5,
+            "base_damage": 3,
+            "damage_variation": 2,
+            "spawn_chance": 0.4
+        },
+        {
+            "name": "Skeleton",
+            "symbol": "K",
+            "base_hp": 25,
+            "hp_variation": 8,
+            "base_damage": 5,
+            "damage_variation": 3,
+            "spawn_chance": 0.3
+        },
+        {
+            "name": "Goblin",
+            "symbol": "G",
+            "base_hp": 20,
+            "hp_variation": 6,
+            "base_damage": 7,
+            "damage_variation": 2,
+            "spawn_chance": 0.3
+        }
+    ]
+}
