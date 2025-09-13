@@ -91,20 +91,24 @@ class Enemy : public Character {
 private:
     std::string enemy_name;
     char enemy_symbol;
+    std::string state; 
 
 public:
     Enemy(const std::string& name, char symbol, int h, int d)
-        : Character(h, d), enemy_name(name), enemy_symbol(symbol) {
+        : Character(h, d), enemy_name(name), enemy_symbol(symbol), state("tired") {
     }
 
     char getSymbol() const override { return enemy_symbol; }
     std::string getName() const override { return enemy_name; }
+
+    void setState(const std::string& newState) { state = newState; }
+    std::string getState() const { return state; }
 };
 
 class Game {
 private:
     Hero hero;
-    std::vector<Enemy> enemies;
+    std::vector<std::unique_ptr<Enemy>> enemies;
     std::vector<ItemConfig> items_on_map;
     int day;
 
