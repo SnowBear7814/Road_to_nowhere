@@ -12,7 +12,7 @@ void Game::displayIntro() const {
     std::cout << "             Road to nowhere\n";
     std::cout << "========================================\n\n";
 
-    std::cout << "You are a hero walking a looped path.\n";
+    std::cout << "A looped path.\n";
     std::cout << "The world around you is initially empty,\n";
     std::cout << "but gradually fills up thanks to your movement...\n\n";
 
@@ -96,16 +96,16 @@ void Game::spawnEnemies() {
 
     for (const auto& config : enemies_config) {
         if ((float)std::rand() / RAND_MAX < config.spawn_chance) {
-            int hp = config.base_hp + (std::rand() % config.hp_variation);
-            int dmg = config.base_damage + (std::rand() % config.damage_variation);
+            int hp = config.base_hp + (config.hp_variation > 0 ? std::rand() % config.hp_variation : 0);
+            int dmg = config.base_damage + (config.damage_variation > 0 ? std::rand() % config.damage_variation : 0);
 
             int pos = std::rand() % road_path.size();
             int x = road_path[pos].first;
             int y = road_path[pos].second;
 
             if (x != hero_x || y != hero_y) {
-                enemies.emplace_back(config.name, config.symbol, hp, dmg);
-                enemy_positions[{x, y}] = &enemies.back();
+                enemies.push_back(std::make_unique<Enemy>(config.name, config.symbol, hp, dmg));
+                enemy_positions[{x, y}] = enemies.back().get();
                 map[y][x] = ENEMY_POS;
             }
         }
@@ -134,25 +134,53 @@ void Game::battle(Enemy& enemy) {
     std::cout << "\nBattle starts! " << hero.getName() << " vs " << enemy.getName() << "\n";
 
     while (hero.isAlive() && enemy.isAlive()) {
-        enemy.takeDamage(hero.getDamage());
-        std::cout << hero.getName() << " hits " << enemy.getName()
-            << " for " << hero.getDamage() << " damage. "
-            << enemy.getHp() << "/" << enemy.getMaxHp() << " HP left.\n";
+        int enemyAction = std::rand() % 3;
+        std::string enemyState;
+        if (enemyAction == 0) enemyState = "windup";
+        else if (enemyAction == 1) enemyState = "attack";
+        else enemyState = "tired";
 
-        if (!enemy.isAlive()) break;
+        std::cout << "\nEnemy " << enemy.getName() << " is " << enemyState << "!\n";
+        std::cout << "[A] Attack   [B] Block\n";
+        char choice;
+        std::cin >> choice;
 
-        hero.takeDamage(enemy.getDamage());
-        std::cout << enemy.getName() << " hits " << hero.getName()
-            << " for " << enemy.getDamage() << " damage. "
-            << hero.getHp() << "/" << hero.getMaxHp() << " HP left.\n";
+        if (choice == 'A' || choice == 'a') {
+            if (enemyState == "tired") {
+                enemy.takeDamage(hero.getDamage());
+                std::cout << "You strike for " << hero.getDamage()
+                    << "! Enemy HP: " << enemy.getHp() << "/" << enemy.getMaxHp() << "\n";
+            }
+            else if (enemyState == "windup") {
+                std::cout << "Enemy was preparing, your attack hits partially!\n";
+                enemy.takeDamage(hero.getDamage() / 2);
+            }
+            else if (enemyState == "attack") {
+                std::cout << "Enemy hits you while you attack!\n";
+                hero.takeDamage(enemy.getDamage());
+                enemy.takeDamage(hero.getDamage());
+            }
+        }
+        else if (choice == 'B' || choice == 'b') {
+            if (enemyState == "attack") {
+                std::cout << "You blocked the attack!\n";
+            }
+            else if (enemyState == "windup") {
+                std::cout << "You block, but enemy didn't strike.\n";
+            }
+            else if (enemyState == "tired") {
+                std::cout << "Enemy is tired, you wasted the chance!\n";
+            }
+        }
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        std::this_thread::sleep_for(std::chrono::milliseconds(400));
     }
 
     if (hero.isAlive()) {
         std::cout << hero.getName() << " defeated " << enemy.getName() << "!\n";
-        hero.heal(5 + (std::rand() % 6));
-        std::cout << hero.getName() << " healed for " << 5 + (std::rand() % 6) << " HP.\n";
+        int healAmount = 5 + (std::rand() % 6);
+        hero.heal(healAmount);
+        std::cout << hero.getName() << " healed for " << healAmount << " HP.\n";
     }
     else {
         std::cout << hero.getName() << " was defeated by " << enemy.getName() << "...\n";
@@ -268,7 +296,7 @@ void Game::run() {
                 battle(*(enemy_it->second));
 
                 for (auto it = enemies.begin(); it != enemies.end(); ++it) {
-                    if (&(*it) == enemy_it->second) {
+                    if (it->get() == enemy_it->second) {
                         enemies.erase(it);
                         break;
                     }
